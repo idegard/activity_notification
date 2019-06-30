@@ -7,10 +7,9 @@ class CommentsController < ApplicationController
     @comment.user = current_user
 
     if @comment.save
-      @comment.notify_later :users, key: 'comment.create.later'
+      # @comment.notify_later :users, key: 'comment.create.later'
       # @comment.notify       :users, key: 'comment.create.later', notify_later: true
       @comment.notify_now   :users, key: 'comment.create.now'
-      # @comment.notify       :users, key: 'comment.create.now'
       redirect_to @comment.article, notice: 'Comment was successfully created.'
     else
       redirect_to @comment.article

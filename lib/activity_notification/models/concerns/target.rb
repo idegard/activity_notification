@@ -19,6 +19,7 @@ module ActivityNotification
                       :_notification_email_allowed,
                       :_batch_notification_email_allowed,
                       :_notification_subscription_allowed,
+                      :_notification_action_cable_allowed,
                       :_notification_devise_resource,
                       :_notification_current_devise_target,
                       :_printable_notification_target_name
@@ -39,6 +40,7 @@ module ActivityNotification
         self._notification_email_allowed         = ActivityNotification.config.email_enabled
         self._batch_notification_email_allowed   = ActivityNotification.config.email_enabled
         self._notification_subscription_allowed  = ActivityNotification.config.subscription_enabled
+        self._notification_action_cable_allowed  = ActivityNotification.config.action_cable_enabled
         self._notification_devise_resource       = ->(model) { model }
         self._notification_current_devise_target = ->(current_resource) { current_resource }
         self._printable_notification_target_name = :printable_name
@@ -185,6 +187,16 @@ module ActivityNotification
       resolve_value(_notification_subscription_allowed, key)
     end
     alias_method :notification_subscription_allowed?, :subscription_allowed?
+
+    # Returns if publishing WebSocket using ActionCable is allowed for the target from configured field or overriden method.
+    # This method is able to be overriden.
+    #
+    # @param [Object] notifiable Notifiable instance of the notification
+    # @param [String] key Key of the notification
+    # @return [Boolean] If publishing WebSocket using ActionCable is allowed for the target
+    def notification_action_cable_allowed?(notifiable = nil, key = nil)
+      resolve_value(_notification_action_cable_allowed, notifiable, key)
+    end
 
     # Returns if current resource signed in with Devise is authenticated for the notification.
     # This method is able to be overriden.

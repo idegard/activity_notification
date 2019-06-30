@@ -7,7 +7,7 @@ unless ENV['AN_TEST_DB'] == 'mongodb'
 
     acts_as_notifiable :users,
       targets: ->(comment, key) { ([comment.article.user] + comment.article.commented_users.to_a - [comment.user]).uniq },
-      group: :article, notifier: :user, email_allowed: true,
+      group: :article, notifier: :user, email_allowed: true, action_cable_allowed: true,
       parameters: { 'test_default_param' => '1' },
       notifiable_path: :article_notifiable_path,
       printable_name: ->(comment) { "comment \"#{comment.body}\"" },
@@ -39,7 +39,7 @@ unless ENV['AN_TEST_DB'] == 'mongodb'
     end
     acts_as_notifiable :admins, targets: [Admin.first].compact,
       group: :article, notifier: :user, notifiable_path: :article_notifiable_path,
-      tracked: { only: [:create] },
+      tracked: { only: [:create], action_cable_rendering: { fallback: :default } },
       printable_name: ->(comment) { "comment \"#{comment.body}\"" },
       dependent_notifications: :delete_all,
       optional_targets: optional_targets
@@ -68,7 +68,7 @@ else
     include ActivityNotification::Models
     acts_as_notifiable :users,
       targets: ->(comment, key) { ([comment.article.user] + comment.article.commented_users.to_a - [comment.user]).uniq },
-      group: :article, notifier: :user, email_allowed: true,
+      group: :article, notifier: :user, email_allowed: true, action_cable_allowed: true,
       parameters: { 'test_default_param' => '1' },
       notifiable_path: :article_notifiable_path,
       printable_name: ->(comment) { "comment \"#{comment.body}\"" },
@@ -100,7 +100,7 @@ else
     end
     acts_as_notifiable :admins, targets: [Admin.first].compact,
       group: :article, notifier: :user, notifiable_path: :article_notifiable_path,
-      tracked: { only: [:create] },
+      tracked: { only: [:create], action_cable_rendering: { fallback: :default } },
       printable_name: ->(comment) { "comment \"#{comment.body}\"" },
       dependent_notifications: :delete_all,
       optional_targets: optional_targets

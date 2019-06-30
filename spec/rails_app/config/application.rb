@@ -22,6 +22,9 @@ require "action_mailer/railtie"
 require "action_view/railtie"
 require "sprockets/railtie"
 # require "rails/test_unit/railtie"
+if Rails::VERSION::MAJOR >= 5
+  require 'action_cable/engine'
+end
 
 Bundler.require(*Rails.groups)
 require "activity_notification"

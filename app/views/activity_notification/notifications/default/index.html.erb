@@ -1,6 +1,16 @@
 <div class="notification_wrapper">
   <div class="notification_header">
-    <h1>Notifications to <%= @target.printable_target_name %> <%= link_to open_all_notifications_path_for(@target, @index_options.slice(:routing_scope, :devise_default_routes)), method: :post, remote: true do %><span class="notification_count"><span class="<%= 'unopened' if @target.has_unopened_notifications?(@index_options) %>"><%= @target.unopened_notification_count(@index_options) %></span></span><% end %></h1>
+    <h1>
+      Notifications to <%= @target.printable_target_name %>
+      <%= link_to open_all_notifications_path_for(@target, @index_options.slice(:routing_scope, :devise_default_routes)), method: :post, remote: true do %>
+        <span class="notification_count"><span class="<%= 'unopened' if @target.has_unopened_notifications?(@index_options) %>">
+          <%= @target.unopened_notification_count(@index_options) %>
+        </span></span>
+      <% end %>
+    </h1>
+    <h3>
+      <span class="action_cable_status">Offline</span>
+    </h3>
   </div>
   <div class="notifications">
     <% if @index_options[:with_group_members] %>
@@ -28,3 +38,33 @@
     background-color: #f87880;
   }
 </style>
+
+<% if @target.notification_action_cable_allowed? %>
+  <script>
+    App.activity_notification = App.cable.subscriptions.create(
+      {
+        channel: "ActivityNotification::NotificationChannel",
+        target_type: "<%= @target.class.name %>", target_id: "<%= @target.id %>"
+      },
+      {
+        connected: function() {
+          $(".action_cable_status").html("Online");
+        },
+        disconnected: function() {
+          $(".action_cable_status").html("Offline");
+        },
+        received: function(notification) {
+          console.log(notification.group_owner_id)
+          if (notification.group_owner_id == null) {
+            $(".notifications").prepend(notification.view);
+            $(".notification_count").html("<span class=unopened>" + notification.unopened_notification_count + "</span>");
+          } else {
+            $(".notification_" + notification.group_owner_id).remove();
+            $(".notifications").prepend(notification.group_owner_view);
+            $(".notification_count").html("<span class=unopened>" + notification.unopened_notification_count + "</span>");
+          }
+        }
+      }
+    );
+  </script>
+<% end %>
